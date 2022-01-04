@@ -58,7 +58,7 @@ train_pipeline = [
 ]
 
 test_pipeline = [
-    dict(type='LoadImageFromFile'),
+    dict(type='LoadImageFromFile', to_float32=True),
     dict(
         type='MultiScaleFlipAug',
         img_scale=img_scale,
@@ -74,6 +74,7 @@ test_pipeline = [
             dict(type='VideoCollect', keys=['img'])
         ])
 ]
+
 data = dict(
     samples_per_gpu=samples_per_gpu,
     workers_per_gpu=4,
