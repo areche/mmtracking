@@ -764,25 +764,31 @@ class SeqPhotoMetricDistortion(object):
             assert results['img_fields'] == ['img'], \
                 'Only single img_fields is allowed'
         img = results['img']
+
         assert img.dtype == np.float32, \
             'PhotoMetricDistortion needs the input image of dtype np.float32,'\
             ' please set "to_float32=True" in "LoadImageFromFile" pipeline'
         # random brightness
         if params['delta'] is not None:
             img += params['delta']
+            img[img > 255] = 255
+            img[img < 0] = 0
 
         # mode == 0 --> do random contrast first
         # mode == 1 --> do random contrast last
         if params['contrast_first']:
             if params['alpha'] is not None:
                 img *= params['alpha']
+                img[img > 255] = 255
 
         # convert color from BGR to HSV
+        img /= 255.
         img = mmcv.bgr2hsv(img)
 
         # random saturation
         if params['saturation'] is not None:
             img[..., 1] *= params['saturation']
+            img[..., 1][img[..., 1] > 1] = 1
 
         # random hue
         if params['hue'] is not None:
@@ -792,11 +798,13 @@ class SeqPhotoMetricDistortion(object):
 
         # convert color from HSV to BGR
         img = mmcv.hsv2bgr(img)
+        img *= 255.
 
         # random contrast
         if not params['contrast_first']:
             if params['alpha'] is not None:
                 img *= params['alpha']
+                img[img > 255] = 255
 
         # randomly swap channels
         if params['permutation'] is not None:
